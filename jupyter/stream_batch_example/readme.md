@@ -34,7 +34,7 @@ In the jupyter notebook, deposit it into `data > input > device_data`. The examp
 
 Run `docker compose up` in directory images > kafka-cluster-with-jupyter-notebook.
 
-Prepare kafka to stream to spark in docker:
+Prepare Kafka to stream to spark in docker:
 ```
 docker exec -it cf-kafka-1 /bin/bash 
 kafka-topics --create --topic device-data --bootstrap-server localhost:29092
@@ -45,21 +45,26 @@ kafka-console-producer --topic device-data --bootstrap-server localhost:29092
 
 # stream_from_kafka_auto_example
 
-This will utilise 2 python scripts `device_events.py` and `post_to_kafka.py`
-
-device_events.py - Generates random device events data in json format
-post_to_kafka.py - Instantiates a Kafka producer and publishes device events data in json format to Kafka
-
-post_to_kafka.py requires installation of kafka-python
-
-
 Run `docker compose up` in directory images > kafka-cluster-with-jupyter-notebook.
 
-Prepare kafka to stream to spark in docker:
+Prepare a Kafka topic for a python script which will be described later:
 ```
 docker exec -it cf-kafka-1 /bin/bash 
 kafka-topics --create --topic device-data --bootstrap-server localhost:29092
 kafka-topics --list --bootstrap-server localhost:29092
+```
 
-kafka-console-producer --topic device-data --bootstrap-server localhost:29092
+This example will utilise 2 python scripts `device_events.py` and `post_to_kafka.py`
+
+device_events.py - Generates random device events data in json format
+post_to_kafka.py - Instantiates a Kafka producer and publishes device events data in json format to Kafka
+
+post_to_kafka.py requires installation of kafka-python with `pip install kafka-python`.
+
+Start publishing data to Kafka with `python post_to_kafka.py`
+
+To increase the number of partitions of our topic use:
+```
+docker exec -it cf-kafka-1 /bin/bash 
+kafka-topics --alter --topic device-data --partitions 8 --bootstrap-server localhost:29092
 ```
