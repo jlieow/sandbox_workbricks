@@ -172,37 +172,13 @@ Some examples of malformed data:
 
 To trigger the exception, you can stop the PSQL DB and run the python script. The exception will be triggered when it attempts to connect and write to the PSQL DB.
 
-# stream_window
+# stream_window_watermark
 
-This example demonstrates a simple example of how to perform error and exception handling. In this example errors are sent to an error table whilst exceptions are saved as a file to a blob storage location.
+This example demonstrates watermarks with fixed/tumbling and sliding/overlapping windows. It is easier to understand watermarks with fixed windows.
+
+A watermark in Spark is a threshold that defines how late data can arrive and still be processed in a streaming application. It enables Spark to efficiently manage memory by cleaning up old, irrelevant state tied to aggregations and windows, ensuring processing scalability and preventing unbounded growth of stored data.
 
 Run `docker compose up` in directory images > kafka-cluster-with-jupyter-notebook.
-
-In sqlpad to prepare PSQL DB, execute:
-```
-CREATE TABLE IF NOT EXISTS public.device_data (
-	customerid varchar,
-	eventid varchar,
-	eventoffset varchar,
-	eventpublisher varchar,
-	eventtime varchar,
-	deviceid varchar,
-	measure varchar,
-	status varchar,
-	temperature varchar
-);
-
-CREATE TABLE IF NOT EXISTS public.device_data_error (
-	key varchar,
-	value varchar,
-	eventtimestamp timestamp,
-	batchid int
-);
-
-SELECT * FROM device_data;
-
-SELECT * FROM device_data_error;
-```
 
 Prepare a Kafka topic for a python script which will be described later:
 ```
@@ -212,9 +188,10 @@ kafka-topics --list --bootstrap-server localhost:29092
 kafka-console-producer --topic wildlife --bootstrap-server localhost:29092
 ```
 
-Some example wildlife messages:
+These example wildlife messages attempt to demonstrate watermarks:
 ```
-{"event_time": "2024-04-09 12:00:00.000000", "data": "owl dog owl"}
+{"event_time": "2024-04-09 11:50:00.000000", "data": "owl dog"}
+{"event_time": "2024-04-09 12:01:00.000000", "data": "owl dog owl"}
 {"event_time": "2024-04-09 12:03:00.000000", "data": "owl"}
 {"event_time": "2024-04-09 12:05:00.000000", "data": "owl"}
 {"event_time": "2024-04-09 12:13:00.000000", "data": "dog owl"}
@@ -222,5 +199,31 @@ Some example wildlife messages:
 
 
 
-{"event_time": "2024-04-09 11:04:00.000000", "data": "dog"}
+{"event_time": "2024-04-09 11:59:00.000000", "data": "dog"}
+{"event_time": "2024-04-09 12:01:00.000000", "data": "dog"}
+```
+
+Assume that the watermark and window is set for `10 minutes`. The messages above will have the following windows:
+2024-04-09 11:50:00|2024-04-09 12:00:00
+2024-04-09 12:00:00|2024-04-09 12:10:00
+2024-04-09 12:10:00|2024-04-09 12:20:00
+
+Only messages that is submitted in a window within the watermark will be processed. That means after the message is submitted at `2024-04-09 12:17:00.000000`, (as the watermark is 10 minutes) only messages submitted in the following windows will be processed:
+2024-04-09 12:00:00|2024-04-09 12:10:00
+2024-04-09 12:10:00|2024-04-09 12:20:00
+
+Notice that watermarks do not work with windows in complete mode.
+
+To reset delete the checkpoint directories:
+```
+rm -rf checkpoint_dir_kafka_2
+rm -rf checkpoint_dir_kafka_3
+```
+
+And purge the kafka topic:
+```
+kafka-topics --delete --topic wildlife --bootstrap-server localhost:29092
+kafka-topics --create --topic wildlife --bootstrap-server localhost:29092
+kafka-topics --list --bootstrap-server localhost:29092
+kafka-console-producer --topic wildlife --bootstrap-server localhost:29092
 ```
