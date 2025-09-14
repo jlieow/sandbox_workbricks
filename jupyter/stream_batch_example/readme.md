@@ -16,6 +16,12 @@ docker logs jupyter
 
 To delete directory with contents use `rm -f dir`
 
+## JAR Files
+
+To search for JAR packages search [Maven Central Repository](https://central.sonatype.com/). For each package, Maven Central provides the dependency snippet (groupId:artifactId:version).
+
+Example: org.apache.spark:spark-sql_2.12:3.5.0
+
 # stream_example
 
 Exec into the jupyter notebook, install netcat and start listening for connections on port 9999.
