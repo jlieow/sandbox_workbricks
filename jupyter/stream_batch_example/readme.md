@@ -98,7 +98,7 @@ kafka-topics --list --bootstrap-server localhost:29092
 kafka-console-producer --topic device-data --bootstrap-server localhost:29092
 ```
 
-Some example device-data message:
+Some example device-data messages:
 1. `{"eventId": "e3cb26d3-41b2-49a2-84f3-0156ed8d7502", "eventOffset": 10001, "eventPublisher": "device", "customerId": "CI00103", "data": {"devices": [{"deviceId": "D001", "temperature": 15, "measure": "C", "status": "ERROR"}, {"deviceId": "D002", "temperature": 16, "measure": "C", "status": "SUCCESS"}]}, "eventTime": "2023-01-05 11:13:53.643364"}`
 
 2. `{"eventId": "aa90011f-3967-496c-b94b-a0c8de19a3d3", "eventOffset": 10003, "eventPublisher": "device", "customerId": "CI00108", "data": {"devices": [{"deviceId": "D004", "temperature": 16, "measure": "C", "status": "SUCCESS"}]}, "eventTime": "2023-01-05 11:13:53.643364"}`
@@ -157,7 +157,7 @@ kafka-topics --list --bootstrap-server localhost:29092
 kafka-console-producer --topic device-data --bootstrap-server localhost:29092
 ```
 
-Some example device-data message:
+Some example device-data messages:
 1. `{"eventId": "e3cb26d3-41b2-49a2-84f3-0156ed8d7502", "eventOffset": 10001, "eventPublisher": "device", "customerId": "CI00103", "data": {"devices": [{"deviceId": "D001", "temperature": 15, "measure": "C", "status": "ERROR"}, {"deviceId": "D002", "temperature": 16, "measure": "C", "status": "SUCCESS"}]}, "eventTime": "2023-01-05 11:13:53.643364"}`
 
 2. `{"eventId": "aa90011f-3967-496c-b94b-a0c8de19a3d3", "eventOffset": 10003, "eventPublisher": "device", "customerId": "CI00108", "data": {"devices": [{"deviceId": "D004", "temperature": 16, "measure": "C", "status": "SUCCESS"}]}, "eventTime": "2023-01-05 11:13:53.643364"}`
@@ -170,4 +170,57 @@ Some examples of malformed data:
 
 2. `{"eventId": "a920562e-e8c0-4884-ad28-b74d82fc9ad8", "eventOffset": 10018, "eventPublisher": "device", "customerId": "CI00118", "data": {"devices": []}, "eventTime": "2023-01-05 11:13:53.649684"}`
 
-To trigger the exception, you can stop the PSQL DB.
+To trigger the exception, you can stop the PSQL DB and run the python script. The exception will be triggered when it attempts to connect and write to the PSQL DB.
+
+# stream_window
+
+This example demonstrates a simple example of how to perform error and exception handling. In this example errors are sent to an error table whilst exceptions are saved as a file to a blob storage location.
+
+Run `docker compose up` in directory images > kafka-cluster-with-jupyter-notebook.
+
+In sqlpad to prepare PSQL DB, execute:
+```
+CREATE TABLE IF NOT EXISTS public.device_data (
+	customerid varchar,
+	eventid varchar,
+	eventoffset varchar,
+	eventpublisher varchar,
+	eventtime varchar,
+	deviceid varchar,
+	measure varchar,
+	status varchar,
+	temperature varchar
+);
+
+CREATE TABLE IF NOT EXISTS public.device_data_error (
+	key varchar,
+	value varchar,
+	eventtimestamp timestamp,
+	batchid int
+);
+
+SELECT * FROM device_data;
+
+SELECT * FROM device_data_error;
+```
+
+Prepare a Kafka topic for a python script which will be described later:
+```
+docker exec -it cf-kafka-1 /bin/bash 
+kafka-topics --create --topic wildlife --bootstrap-server localhost:29092
+kafka-topics --list --bootstrap-server localhost:29092
+kafka-console-producer --topic wildlife --bootstrap-server localhost:29092
+```
+
+Some example wildlife messages:
+```
+{"event_time": "2024-04-09 12:00:00.000000", "data": "owl dog owl"}
+{"event_time": "2024-04-09 12:03:00.000000", "data": "owl"}
+{"event_time": "2024-04-09 12:05:00.000000", "data": "owl"}
+{"event_time": "2024-04-09 12:13:00.000000", "data": "dog owl"}
+{"event_time": "2024-04-09 12:17:00.000000", "data": "dog"}
+
+
+
+{"event_time": "2024-04-09 11:04:00.000000", "data": "dog"}
+```
