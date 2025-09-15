@@ -9,7 +9,7 @@ required_providers {
 
 	backend "azurerm" {
 		resource_group_name  = "fe-shared-emea-001"
-		storage_account_name = "tfstatejlieow54321abcde"
+		storage_account_name = "jlieowtfstate54321abcde"
 		container_name       = "tfstate"
 		key                  = "azure_sandbox/databricks_workspace/standard_workspace/terraform.tfstate"
   }

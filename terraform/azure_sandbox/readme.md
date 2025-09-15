@@ -4,7 +4,7 @@
 Create a Azure storage account and container:
 ```
 RESOURCE_GROUP_NAME=fe-shared-emea-001
-STORAGE_ACCOUNT_NAME=tfstatejlieow54321abcde
+STORAGE_ACCOUNT_NAME=jlieowtfstate54321abcde
 CONTAINER_NAME=tfstate
 
 # Create storage account
@@ -26,7 +26,7 @@ terraform {
 
   backend "azurerm" {
       resource_group_name  = "fe-shared-emea-001"
-      storage_account_name = "tfstatejlieow54321abcde"
+      storage_account_name = "jlieowtfstate54321abcde"
       container_name       = "tfstate"
       key                  = "azure_sandbox/xxx/yyy/terraform.tfstate"
   }
