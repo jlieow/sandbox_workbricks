@@ -1,3 +1,6 @@
+# Configure Access
+
+Use `az login`.
 
 # Configure Remote State Storage Account
 
