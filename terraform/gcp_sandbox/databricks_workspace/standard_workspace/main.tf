@@ -8,6 +8,7 @@ terraform {
 provider "google" {
   project     = "fe-dev-sandbox"
   region      = "europe-west2"
+	credentials = file("/Users/jerome.lieow/Documents/Secrets/fe-dev-sandbox-9923481d3082.json")
 }
 
 resource "google_compute_network" "vpc_network" {
