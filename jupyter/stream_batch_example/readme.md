@@ -233,3 +233,14 @@ kafka-topics --create --topic wildlife --bootstrap-server localhost:29092
 kafka-topics --list --bootstrap-server localhost:29092
 kafka-console-producer --topic wildlife --bootstrap-server localhost:29092
 ```
+
+# connect_to_spark_cluster
+
+Run `docker compose up` in directory images > spark-cluster-with-jupyter-notebook.
+
+The volume will require `:rw`. The `:rw` option on a Docker volume means the container can both read from and write to the mounted files or directories. 
+
+## spark submit
+
+The usual way to submit a job to a Spark cluster is by using the `spark-submit` command: 
+`spark-submit --master spark://e32a4604fcd1:7077 --num-executors 2 --executor-cores 1 --executor-memory 512M connect_to_spark_cluster.py`
