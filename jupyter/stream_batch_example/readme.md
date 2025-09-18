@@ -244,3 +244,13 @@ The volume will require `:rw`. The `:rw` option on a Docker volume means the con
 
 The usual way to submit a job to a Spark cluster is by using the `spark-submit` command: 
 `spark-submit --master spark://e32a4604fcd1:7077 --num-executors 2 --executor-cores 1 --executor-memory 512M connect_to_spark_cluster.py`
+
+# python_udf_example
+
+To see the Spark creating a Python process to run the UDF, uncommit the `time.sleep(10)` before running the `show()` command otherwise the Python process may be deleted too quickly. 
+
+Exec into a Spark worker to see the Python process with:
+```
+docker exec -it spark-worker-1 /bin/bash
+ps aux
+```

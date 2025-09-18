@@ -26,7 +26,7 @@ services:
       - cf-zookeeper
 
   jupyter:
-    image: quay.io/jupyter/pyspark-notebook
+    image: quay.io/jupyter/pyspark-notebook:python-3.12
     container_name: jupyter
     user: root
     ports:

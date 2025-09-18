@@ -1,4 +1,6 @@
 # Docker image with Jupyter notebook and PySpark
+Note: Image repo - https://quay.io/organization/jupyter
+
 docker pull quay.io/jupyter/pyspark-notebook
 docker run -p 8888:8888 quay.io/jupyter/pyspark-notebook
 
