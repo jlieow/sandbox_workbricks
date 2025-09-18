@@ -254,3 +254,15 @@ Exec into a Spark worker to see the Python process with:
 docker exec -it spark-worker-1 /bin/bash
 ps aux
 ```
+
+# databricks_partition_and_z_order_optimization
+
+Spark partitioning physically splits data by specific column values into files or directories, making it ideal for columns with low cardinality (few distinct values), such as date or region, to improve query performance and data skipping. 
+
+Z-order (Z-Ordering), by contrast, clusters related records within files on one or more columns, making it effective for range queries, especially when dealing with high cardinality (many distinct values) or when queries filter on multiple columns.
+
+Take note that the default value for `spark.databricks.delta.optimize.maxFileSize` is 1073741824, which sets the size to 1 GB. For smaller file sizes this value should be reduced otherwise, all data may be packed into a single large file, diminishing the effectiveness of Z-ordering.
+
+Liquid clustering is newer, automatically lays out data for fast queries, allows clustering columns to evolve without rewriting existing files, and handles high cardinality, skew, and frequent inserts more flexibly than Z-order.
+
+Use Z-order for fixed query patterns and partitioning and use liquid clustering for dynamic, evolving workloads and fast incremental optimization.
