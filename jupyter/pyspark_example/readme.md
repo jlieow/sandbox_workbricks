@@ -266,3 +266,18 @@ Take note that the default value for `spark.databricks.delta.optimize.maxFileSiz
 Liquid clustering is newer, automatically lays out data for fast queries, allows clustering columns to evolve without rewriting existing files, and handles high cardinality, skew, and frequent inserts more flexibly than Z-order.
 
 Use Z-order for fixed query patterns and partitioning and use liquid clustering for dynamic, evolving workloads and fast incremental optimization.
+
+# oom_error
+
+Unzip files at `data > input > oom > spark_oom_files.7z`.
+
+Run the script and go to `localhost:4040` to view the failing stages.
+
+`text_file_singleline_xs.txt` is 11MB. Each record is 11MB due to the single line text. When the explode function is run, it creates a new record for each word in the single line text which dramatically increases the size of the data. As the size of the execution memory is only 23.352MB, it is unable to contain the exploded data size and throws a OOM error.
+
+Causes of OOM Error:
+1. Individual record is larger than the execution memory. Spark cannot spill individual records, it can only spill partitions.
+2. During wide operations the shuffle data is larger than the execution memory.
+3. Each broadcast variable is larger than the execution memory.
+4. Explosion of memory results in data larger than the execution memory.
+5. Expansion of memory due to deserialisation or uncompression results in data larger than the execution memory.
