@@ -11,7 +11,7 @@ required_providers {
 		resource_group_name  = "fe-shared-emea-001"
 		storage_account_name = "jlieowtfstate54321abcde"
 		container_name       = "tfstate"
-		key                  = "azure_sandbox/databricks_workspace/standard_workspace/terraform.tfstate"
+		key                  = "azure_sandbox/databricks_workspace/azure_workspace/terraform.tfstate"
   }
 }
 
@@ -24,9 +24,15 @@ data "azurerm_resource_group" "fe_shared_emea_001" {
   name = "fe-shared-emea-001"
 }
 
+resource "random_string" "random" {
+	length 	= 5
+	special = false
+	upper 	= false
+}
+
 locals {
-	prefix = "jlieow"
-	# prefix = "${local.identifier}-azure-workspace"
+	prefix 		 = "jlieow${random_string.random.result}"
+	location   = "West Europe"
 }
 
 resource "azurerm_resource_group" "databricks_managed_rg" {

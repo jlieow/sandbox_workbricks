@@ -1,0 +1,84 @@
+name: unitycatalog
+
+services:
+
+  spark:
+    image: docker.io/bitnami/spark:4.0.0
+    container_name: spark-master
+    environment:
+      - SPARK_MODE=master
+      - SPARK_RPC_AUTHENTICATION_ENABLED=no
+      - SPARK_RPC_ENCRYPTION_ENABLED=no
+      - SPARK_LOCAL_STORAGE_ENCRYPTION_ENABLED=no
+      - SPARK_SSL_ENABLED=no
+      - SPARK_USER=spark
+    ports:
+      - "8000:8080"
+      - "7077:7077"
+    volumes:
+      - /Users/jerome.lieow/Documents/Jupyter:/home/jovyan:rw
+
+  spark-worker-1:
+    image: docker.io/bitnami/spark:4.0.0
+    container_name: spark-worker-1
+    environment:
+      - SPARK_MODE=worker
+      - SPARK_MASTER_URL=spark://spark:7077
+      - SPARK_WORKER_MEMORY=1G
+      - SPARK_WORKER_CORES=2
+      - SPARK_RPC_AUTHENTICATION_ENABLED=no
+      - SPARK_RPC_ENCRYPTION_ENABLED=no
+      - SPARK_LOCAL_STORAGE_ENCRYPTION_ENABLED=no
+      - SPARK_SSL_ENABLED=no
+      - SPARK_USER=spark
+    volumes:
+      - /Users/jerome.lieow/Documents/Jupyter:/home/jovyan:rw
+    deploy:
+      resources:
+        limits:
+          cpus: 2
+    
+  spark-worker-2:
+    image: docker.io/bitnami/spark:4.0.0
+    container_name: spark-worker-2
+    environment:
+      - SPARK_MODE=worker
+      - SPARK_MASTER_URL=spark://spark:7077
+      - SPARK_WORKER_MEMORY=1G
+      - SPARK_WORKER_CORES=2
+      - SPARK_RPC_AUTHENTICATION_ENABLED=no
+      - SPARK_RPC_ENCRYPTION_ENABLED=no
+      - SPARK_LOCAL_STORAGE_ENCRYPTION_ENABLED=no
+      - SPARK_SSL_ENABLED=no
+      - SPARK_USER=spark
+    volumes:
+      - /Users/jerome.lieow/Documents/Jupyter:/home/jovyan:rw
+    deploy:
+      resources:
+        limits:
+          cpus: 2
+
+  server:
+    image: unitycatalog/unitycatalog:latest
+    ports:
+      - "8080:8080"
+    volumes:
+      - type: bind
+        source: ./etc/conf
+        target: /opt/unitycatalog/etc/conf
+      - type: volume
+        source: unitycatalog_data
+        target: /opt/unitycatalog/etc/data
+  ui:
+    build:
+      context: ui/
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    depends_on:
+      - server
+
+volumes:
+  # Persist docker volume across container restarts
+  unitycatalog_data:
+

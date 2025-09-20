@@ -24,9 +24,15 @@ data "azurerm_resource_group" "fe_shared_emea_001" {
   name = "fe-shared-emea-001"
 }
 
+resource "random_string" "random" {
+	length 	= 5
+	special = false
+	upper 	= false
+}
+
 locals {
-	identifier = "jlieow"
-	prefix = "${local.identifier}-sample-workspace"
+	prefix 		 = "jlieow${random_string.random.result}"
+	location   = "West Europe"
 }
 
 resource "azurerm_databricks_workspace" "sample_workspace" {
