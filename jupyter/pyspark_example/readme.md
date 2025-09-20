@@ -263,7 +263,7 @@ Z-order (Z-Ordering), by contrast, clusters related records within files on one 
 
 Take note that the default value for `spark.databricks.delta.optimize.maxFileSize` is 1073741824, which sets the size to 1 GB. For smaller file sizes this value should be reduced otherwise, all data may be packed into a single large file, diminishing the effectiveness of Z-ordering.
 
-Liquid clustering is newer, automatically lays out data for fast queries, allows clustering columns to evolve without rewriting existing files, and handles high cardinality, skew, and frequent inserts more flexibly than Z-order.
+Liquid clustering is a new feature available in Databricks which automatically lays out data for fast queries, allows clustering columns to evolve without rewriting existing files, and handles high cardinality, skew, and frequent inserts more flexibly than Z-order. You can only specify columns that have statistics collected as clustering keys. By default, the first 32 columns in a Delta table have statistics collected as described [here](https://docs.databricks.com/aws/en/delta/data-skipping#stats-cols).
 
 Use Z-order for fixed query patterns and partitioning and use liquid clustering for dynamic, evolving workloads and fast incremental optimization.
 
@@ -281,3 +281,11 @@ Causes of OOM Error:
 3. Each broadcast variable is larger than the execution memory.
 4. Explosion of memory results in data larger than the execution memory.
 5. Expansion of memory due to deserialisation or uncompression results in data larger than the execution memory.
+
+# PySpark, Parquet and Delta Lakes
+
+Parquet is a columnar storage file format, optimized for read performance, compression, and efficient analytics. It is the physical format that stores the raw data on disk.
+
+Delta Lake builds on top of Parquet. It introduces a transactional log (delta log) alongside Parquet files to enable ACID transactions, schema enforcement, time travel, and other powerful features such as version control, deletion vectors and liquid clustering. All Delta tables store their data as Parquet files but track metadata and versions in an additional directory.
+
+PySpark is the Python API for Apache Spark, enabling distributed data processing and analysis. PySpark is used to read, process, and write data in Parquet or Delta Lake formats via high-level APIs.
