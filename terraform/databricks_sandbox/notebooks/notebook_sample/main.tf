@@ -7,7 +7,7 @@ terraform {
 }
 
 provider "databricks" {
-  profile = "DEFAULT"
+  profile = "jeromelieowdatabricks_free_edition"
 }
 
 data "databricks_current_user" "me" {}
