@@ -6,8 +6,12 @@ terraform {
   }
 }
 
-provider "databricks" {
+locals {
   profile = "jeromelieowdatabricks_free_edition"
+}
+
+provider "databricks" {
+  profile = local.profile
 }
 
 data "databricks_current_user" "me" {}
@@ -175,11 +179,11 @@ resource "null_resource" "trigger_job" {
     command = <<-EOT
       # Run job with default settings 
       databricks jobs run-now ${databricks_job.process_emp_data_by_dept.id} --profile jeromelieowdatabricks_free_edition
-      databricks jobs run-now ${databricks_job.process_emp_data_by_dept_with_iterative_task.id} --profile jeromelieowdatabricks_free_edition
+      databricks jobs run-now ${databricks_job.process_emp_data_by_dept_with_iterative_task.id} --profile ${local.profile}
 
       # Run job with different settings 
-      databricks jobs run-now --json '{ "job_id":${databricks_job.process_emp_data_by_dept.id}, "notebook_params": { "dept":"sales", "input_date":"2024-10-27T13:00:00" } }' --profile jeromelieowdatabricks_free_edition
-      databricks jobs run-now --json '{ "job_id":${databricks_job.process_emp_data_by_dept_with_iterative_task.id}, "notebook_params": { "input_date":"2024-10-27T13:00:00" } }' --profile jeromelieowdatabricks_free_edition
+      databricks jobs run-now --json '{ "job_id":${databricks_job.process_emp_data_by_dept.id}, "notebook_params": { "dept":"sales", "input_date":"2024-10-27T13:00:00" } }' --profile ${local.profile}
+      databricks jobs run-now --json '{ "job_id":${databricks_job.process_emp_data_by_dept_with_iterative_task.id}, "notebook_params": { "input_date":"2024-10-27T13:00:00" } }' --profile ${local.profile}
     EOT
   }
 }

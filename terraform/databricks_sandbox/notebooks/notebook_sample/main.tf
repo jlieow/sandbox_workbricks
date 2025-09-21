@@ -6,8 +6,12 @@ terraform {
   }
 }
 
-provider "databricks" {
+locals {
   profile = "jeromelieowdatabricks_free_edition"
+}
+
+provider "databricks" {
+  profile = local.profile
 }
 
 data "databricks_current_user" "me" {}
