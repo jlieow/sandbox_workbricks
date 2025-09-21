@@ -32,14 +32,14 @@ data "databricks_current_user" "me" {}
 
 resource "databricks_notebook" "_view_data" {
   content_base64 = filebase64("data/_view_data.sql")
-  path     = "${data.databricks_current_user.me.home}/terraform_notebooks/delta_live_tables/_view_data"
+  path     = "${data.databricks_current_user.me.home}/terraform_notebooks/autoloader/dlt_sample_autoloader/_view_data"
   language = "SQL"
 }
 
 # Sets up the required resources to run 01_dlt notebook
 resource "databricks_notebook" "_00_setup" {
   content_base64 = filebase64("data/00_setup.sql")
-  path     = "${data.databricks_current_user.me.home}/terraform_notebooks/delta_live_tables/00_setup"
+  path     = "${data.databricks_current_user.me.home}/terraform_notebooks/autoloader/dlt_sample_autoloader/00_setup"
   language = "SQL"
 }
 
@@ -82,14 +82,8 @@ resource "null_resource" "run_job_00_setup" {
 
 resource "databricks_notebook" "_01_dlt" {
   content_base64 = filebase64("data/01_dlt.py")
-  path     = "${data.databricks_current_user.me.home}/terraform_notebooks/delta_live_tables/01_dlt"
+  path     = "${data.databricks_current_user.me.home}/terraform_notebooks/autoloader/dlt_sample_autoloader/01_dlt"
   language = "PYTHON"
-}
-
-resource "databricks_notebook" "_02_add_incremental_data" {
-  content_base64 = filebase64("data/02_add_incremental_data.sql")
-  path     = "${data.databricks_current_user.me.home}/terraform_notebooks/delta_live_tables/02_add_incremental_data"
-  language = "SQL"
 }
 
 resource "databricks_cluster_policy" "policy" {
@@ -107,7 +101,13 @@ resource "databricks_pipeline" "dlt_pipeline" {
 
   depends_on = [ null_resource.run_job_00_setup ]
 
-  name             = "${local.prefix}_pipeline_00_dlt_sample"
+  provisioner "local-exec" {
+    command = <<-EOT
+    databricks fs cp data/autoloader_1.csv dbfs:/Volumes/_jlieow_dev/etl/landing/files/ --profile ${local.profile}
+    EOT
+  }
+
+  name             = "${local.prefix}_pipeline_00_autoloader_sample"
   edition          = "CORE"
   continuous = false
   run_as_user_name = data.databricks_current_user.me.user_name
@@ -132,4 +132,8 @@ resource "databricks_pipeline" "dlt_pipeline" {
 
   channel = "CURRENT"
   development = true
+
+  configuration = {
+    "custom.orderStatus": "O,F"
+  }
 }

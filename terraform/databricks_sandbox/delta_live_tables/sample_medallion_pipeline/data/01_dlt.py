@@ -62,7 +62,7 @@ def joined_silver():
 # COMMAND ----------
 
 # Aggregate based on c_mktsegment and find the count of order (c_orderkey)
-from pyspark.sql.functions import count
+from pyspark.sql.functions import count, sum
 
 @dlt. table(
   table_properties = {"quality": "gold"},
@@ -71,7 +71,30 @@ from pyspark.sql.functions import count
 def orders_agg_gold():
   df = spark.read.table("LIVE.joined_silver")
 
-  df_final = df.groupBy("c_mktsegment").agg(count("o_orderkey").alias("sum_orders")).withColumn("__insert_date", 
+  df_final = df.groupBy("c_mktsegment").agg(count("o_orderkey").alias("count_orders")).withColumn("__insert_date", 
   current_timestamp())
 
   return df_final
+
+##########################################################################################################################
+
+# Execute after adding incremental data using 02_add_incremental_data
+
+# In a usual ETL pipeline, you would first have to add/update tables/columns before writing the transformation logic.
+# This cell demonstrates how you can add/edit tables/columns using DLT
+# Connect to DLT Pipeline
+# To attach to a pipeline, click the compute selector in the notebook toolbar and select a pipeline from the dropdown menu.
+
+# Unity Catalog associates this cell with the dataset and in order to update the dataset, any updates have to be performed in the same cell
+# Comment code above and uncomment everything after this.
+
+# @dlt. table(
+#   table_properties = {"quality": "gold"},
+#   comment = "orders aggregated table"
+# )
+# def orders_agg_gold():
+#   df = spark.read.table("LIVE.joined_silver")
+
+#   df_final = df.groupBy("c_mktsegment").agg(count("o_orderkey").alias("count_orders"), sum("o_totalprice").alias ("sum_totalprice")).withColumn("__insert_date", current_timestamp())
+
+#   return df_final
