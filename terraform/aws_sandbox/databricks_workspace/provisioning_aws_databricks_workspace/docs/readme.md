@@ -17,6 +17,8 @@ client_secret = ""
 databricks_account_id = ""
 ```
 
+# Tags
+
 Get the following information from [go/tags](go/tags):
 ```
 tags = {}
