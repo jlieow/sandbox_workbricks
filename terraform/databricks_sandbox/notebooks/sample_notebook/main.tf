@@ -22,6 +22,6 @@ resource "databricks_notebook" "notebook" {
     display(spark.range(10))
     EOT
   )
-  path     = "${data.databricks_current_user.me.home}/terraform_notebooks/notebook_sample/helloTerraform"
+  path     = "${data.databricks_current_user.me.home}/terraform_notebooks/notebooks/sample_notebook/helloTerraform"
   language = "PYTHON"
 }

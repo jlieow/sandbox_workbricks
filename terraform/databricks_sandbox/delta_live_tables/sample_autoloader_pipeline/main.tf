@@ -32,14 +32,14 @@ data "databricks_current_user" "me" {}
 
 resource "databricks_notebook" "_view_data" {
   content_base64 = filebase64("data/_view_data.sql")
-  path     = "${data.databricks_current_user.me.home}/terraform_notebooks/autoloader/dlt_sample_autoloader/_view_data"
+  path     = "${data.databricks_current_user.me.home}/terraform_notebooks/delta_live_tables/dlt_sample_autoloader/_view_data"
   language = "SQL"
 }
 
 # Sets up the required resources to run 01_dlt notebook
 resource "databricks_notebook" "_00_setup" {
   content_base64 = filebase64("data/00_setup.sql")
-  path     = "${data.databricks_current_user.me.home}/terraform_notebooks/autoloader/dlt_sample_autoloader/00_setup"
+  path     = "${data.databricks_current_user.me.home}/terraform_notebooks/delta_live_tables/dlt_sample_autoloader/00_setup"
   language = "SQL"
 }
 
@@ -82,7 +82,7 @@ resource "null_resource" "run_job_00_setup" {
 
 resource "databricks_notebook" "_01_dlt" {
   content_base64 = filebase64("data/01_dlt.py")
-  path     = "${data.databricks_current_user.me.home}/terraform_notebooks/autoloader/dlt_sample_autoloader/01_dlt"
+  path     = "${data.databricks_current_user.me.home}/terraform_notebooks/delta_live_tables/dlt_sample_autoloader/01_dlt"
   language = "PYTHON"
 }
 

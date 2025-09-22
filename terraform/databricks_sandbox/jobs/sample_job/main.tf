@@ -19,20 +19,20 @@ data "databricks_current_user" "me" {}
 # get the day of the week
 resource "databricks_notebook" "_01_get_run_day" {
   content_base64 = filebase64("data/01_get_run_day.py")
-  path     = "${data.databricks_current_user.me.home}/terraform_notebooks/job_sample/01_get_run_day"
+  path     = "${data.databricks_current_user.me.home}/terraform_notebooks/jobs/sample_job/01_get_run_day"
   language = "PYTHON"
 }
 
 # write_emp_data filters based on a provided parameter and returns a count of the records
 resource "databricks_notebook" "_02_write_emp_data" {
   content_base64 = filebase64("data/02_write_emp_data.py")
-  path     = "${data.databricks_current_user.me.home}/terraform_notebooks/job_sample/02_write_emp_data"
+  path     = "${data.databricks_current_user.me.home}/terraform_notebooks/jobs/sample_job/02_write_emp_data"
   language = "PYTHON"
 }
 
 resource "databricks_notebook" "_03_else_condition" {
   content_base64 = filebase64("data/03_else_condition.py")
-  path     = "${data.databricks_current_user.me.home}/terraform_notebooks/job_sample/03_else_condition"
+  path     = "${data.databricks_current_user.me.home}/terraform_notebooks/jobs/sample_job/03_else_condition"
   language = "PYTHON"
 }
 
