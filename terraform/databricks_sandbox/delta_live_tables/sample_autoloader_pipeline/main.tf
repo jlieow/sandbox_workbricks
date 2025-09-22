@@ -4,6 +4,13 @@ terraform {
       source = "databricks/databricks"
     }
   }
+
+  backend "azurerm" {
+		resource_group_name  = "fe-shared-emea-001"
+		storage_account_name = "jlieowtfstate54321abcde"
+		container_name       = "tfstate"
+		key                  = "databricks_sandbox/delta_live_tables/sample_autoloader_pipeline/terraform.tfstate"
+  }
 }
 
 locals {
@@ -43,14 +50,14 @@ resource "databricks_notebook" "_00_setup" {
   language = "SQL"
 }
 
-resource "databricks_job" "run_00_setup" {
+resource "databricks_job" "run_00_setup_sample_autoloader_pipeline" {
 
   depends_on = [ 
     databricks_catalog._jlieow_dev, 
     databricks_schema.bronze,
   ]
 
-  name        = "${local.prefix}_job_00_setup"
+  name        = "${local.prefix}_job_00_setup_sample_autoloader_pipeline"
   description = "This job runs 00_setup."
 
   task {
@@ -62,7 +69,7 @@ resource "databricks_job" "run_00_setup" {
   }
 }
 
-resource "null_resource" "run_job_00_setup" {
+resource "null_resource" "run_job_00_setup_sample_autoloader_pipeline" {
 
   depends_on = [ 
     databricks_notebook._00_setup
@@ -75,7 +82,7 @@ resource "null_resource" "run_job_00_setup" {
   provisioner "local-exec" {
     command = <<-EOT
       # Run job with default settings 
-      databricks jobs run-now ${databricks_job.run_00_setup.id} --profile ${local.profile}
+      databricks jobs run-now ${databricks_job.run_00_setup_sample_autoloader_pipeline.id} --profile ${local.profile}
     EOT
   }
 }
@@ -99,7 +106,7 @@ resource "databricks_cluster_policy" "policy" {
 
 resource "databricks_pipeline" "dlt_pipeline" {
 
-  depends_on = [ null_resource.run_job_00_setup ]
+  depends_on = [ null_resource.run_job_00_setup_sample_autoloader_pipeline ]
 
   name             = "${local.prefix}_pipeline_00_autoloader_sample"
   edition          = "CORE"
@@ -134,7 +141,7 @@ resource "databricks_pipeline" "dlt_pipeline" {
 
 resource "null_resource" "populate_volume" {
 
-  depends_on = [ databricks_job.run_00_setup ]
+  depends_on = [ databricks_job.run_00_setup_sample_autoloader_pipeline ]
 
   triggers = {
     value = timestamp()

@@ -50,14 +50,14 @@ resource "databricks_notebook" "_00_setup" {
   language = "SQL"
 }
 
-resource "databricks_job" "run_00_setup" {
+resource "databricks_job" "run_00_setup_sample_scd_pipeline" {
 
   depends_on = [ 
     databricks_catalog._jlieow_dev, 
     databricks_schema.bronze,
   ]
 
-  name        = "${local.prefix}_job_00_setup"
+  name        = "${local.prefix}_job_00_setup_"
   description = "This job runs 00_setup."
 
   task {
@@ -69,7 +69,7 @@ resource "databricks_job" "run_00_setup" {
   }
 }
 
-resource "null_resource" "run_job_00_setup" {
+resource "null_resource" "run_job_00_setup_sample_scd_pipeline" {
 
   depends_on = [ 
     databricks_notebook._00_setup
@@ -82,7 +82,7 @@ resource "null_resource" "run_job_00_setup" {
   provisioner "local-exec" {
     command = <<-EOT
       # Run job with default settings 
-      databricks jobs run-now ${databricks_job.run_00_setup.id} --profile ${local.profile}
+      databricks jobs run-now ${databricks_job.run_00_setup_sample_scd_pipeline.id} --profile ${local.profile}
     EOT
   }
 }
@@ -110,11 +110,11 @@ resource "databricks_cluster_policy" "policy" {
   })
 }
 
-resource "databricks_pipeline" "dlt_pipeline" {
+resource "databricks_pipeline" "sample_scd_pipeline" {
 
-  depends_on = [ null_resource.run_job_00_setup ]
+  depends_on = [ null_resource.run_job_00_setup_sample_scd_pipeline ]
 
-  name             = "${local.prefix}_pipeline_00_autoloader_sample"
+  name             = "${local.prefix}_00_sample_scd_pipeline"
   edition          = "PRO"
   continuous = false
   run_as_user_name = data.databricks_current_user.me.user_name
@@ -147,7 +147,7 @@ resource "databricks_pipeline" "dlt_pipeline" {
 
 resource "null_resource" "populate_volume" {
 
-  depends_on = [ databricks_job.run_00_setup ]
+  depends_on = [ databricks_job.run_00_setup_sample_scd_pipeline ]
 
   triggers = {
     value = timestamp()

@@ -4,6 +4,13 @@ terraform {
       source = "databricks/databricks"
     }
   }
+
+  backend "azurerm" {
+		resource_group_name  = "fe-shared-emea-001"
+		storage_account_name = "jlieowtfstate54321abcde"
+		container_name       = "tfstate"
+		key                  = "databricks_sandbox/jobs/sample_job/terraform.tfstate"
+  }
 }
 
 locals {
