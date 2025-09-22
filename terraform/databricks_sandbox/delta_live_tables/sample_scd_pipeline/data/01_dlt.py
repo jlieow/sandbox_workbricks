@@ -66,14 +66,80 @@ def order_autoloader_append() :
 
 # Create a Materialized View for Customers
 # Input for Materialized View is a batch source
-@dlt. table(
-  table_properties = {"quality": "bronze"},
-  comment = "Customer bronze table",
-  name = "customer_bronze" # If name is specified in the decorator, tables/views take this name instead of the function name.
+# @dlt. table(
+#   table_properties = {"quality": "bronze"},
+#   comment = "Customer bronze table",
+#   name = "customer_bronze" # If name is specified in the decorator, tables/views take this name instead of the function name.
+# )
+# def cust_bronze():
+#   df = spark.read.table("_jlieow_dev.bronze.customer_raw")
+#   return df
+
+# COMMAND ----------
+
+# Create a Materialized View for Customers
+@dlt.view(
+  comment = "Customer bronze view"
 )
-def cust_bronze():
-  df = spark.read.table("_jlieow_dev.bronze.customer_raw")
+def customer_bronze_vw() :
+  df = spark.readStream.table("_jlieow_dev.bronze.customer_raw")
   return df
+
+# COMMAND ----------
+
+# SCD Type 1 simply overwrites old data with new data, so only the most current value is retained and no history is kept. 
+from pyspark.sql.functions import expr
+
+dlt.create_streaming_table("customer_scd1_bronze")
+
+# SCD 1 Customer
+dlt.apply_changes(
+  target             = "customer_scd1_bronze",
+  source             = "customer_bronze_vw", # In order to use apply_changes to create a SCD table, a streaming table/view source is required
+  keys               = ["c_custkey"],
+  stored_as_scd_type = 1,
+  apply_as_deletes   = expr("_src_action = 'D'"),
+  apply_as_truncates = expr("_src_action = 'T'"),
+  sequence_by        = "_src_insert_dt",
+)
+
+# The AUTO CDC APIs replace the APPLY CHANGES APIs and are recommended - https://docs.databricks.com/aws/en/dlt/cdc
+# dlt.create_auto_cdc_flow(
+#   target             = "customer_scd1_bronze",
+#   source             = "customer_bronze_vw", # In order to use apply_changes to create a SCD table, a streaming table/view source is required
+#   keys               = ["c_custkey"],
+#   stored_as_scd_type = 1,
+#   apply_as_deletes   = expr("_src_action = 'D'"),
+#   apply_as_truncates = expr("_src_action = 'T'"),
+#   sequence_by        = "_src_insert_dt",
+# )
+
+# COMMAND ----------
+
+# SCD Type 2 adds a new row to the dimension table each time a change occurs, preserving historical versions and enabling the tracking of changes over time.
+from pyspark.sql.functions import expr
+
+dlt.create_streaming_table("customer_scd2_bronze")
+
+# SCD 2 Customer
+dlt.apply_changes(
+  target             = "customer_scd2_bronze",
+  source             = "customer_bronze_vw", # In order to use apply_changes to create a SCD table, a streaming table/view source is required
+  keys               = ["c_custkey"],
+  stored_as_scd_type = 2,
+  except_column_list = ["_src_action", "_src_insert_dt"],
+  sequence_by        = "_src_insert_dt",
+)
+
+# The AUTO CDC APIs replace the APPLY CHANGES APIs and are recommended - https://docs.databricks.com/aws/en/dlt/cdc
+# dlt.create_auto_cdc_flow(
+#   target             = "customer_scd2_bronze",
+#   source             = "customer_bronze_vw", # In order to use apply_changes to create a SCD table, a streaming table/view source is required
+#   keys               = ["c_custkey"],
+#   stored_as_scd_type = 2,
+#   except_column_list = ["_src_action", "_src_insert_dt"],
+#   sequence_by        = "_src_insert_dt",
+# )
 
 # COMMAND ----------
 
@@ -83,7 +149,7 @@ def cust_bronze():
 )
 def joined_vw():
   df_o = spark.read.table("LIVE.orders_union_bronze")
-  df_c = spark.read.table("LIVE.customer_bronze")
+  df_c = spark.read.table("LIVE.customer_scd2_bronze").where("__END_AT is null")
   
   df_join = df_o.join(df_c, how = "left_outer", on=df_c.c_custkey==df_o.o_custkey)
   
@@ -115,7 +181,7 @@ from pyspark.sql.functions import count, sum
 def orders_agg_gold():
   df = spark.read.table("LIVE.joined_silver")
 
-  df_final = df.groupBy("c_mktsegment").agg(count("o_orderkey").alias("count_orders"), sum("o_totalprice").alias ("sum_totalprice")).withColumn("__insert_date", current_timestamp())
+  df_final = df.groupBy("c_mktsegment").agg(count("o_orderkey").alias("count_orders"), sum("o_totalprice").alias("sum_totalprice")).withColumn("__insert_date", current_timestamp())
 
   return df_final
 

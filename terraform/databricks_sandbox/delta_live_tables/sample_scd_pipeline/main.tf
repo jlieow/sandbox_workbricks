@@ -86,6 +86,12 @@ resource "databricks_notebook" "_01_dlt" {
   language = "PYTHON"
 }
 
+resource "databricks_notebook" "_02_insert_records" {
+  content_base64 = filebase64("data/02_insert_records.sql")
+  path     = "${data.databricks_current_user.me.home}/terraform_notebooks/delta_live_tables/sample_scd_pipeline/02_insert_records"
+  language = "SQL"
+}
+
 resource "databricks_cluster_policy" "policy" {
   name       = "${local.prefix}_cluster_policy"
   definition = jsonencode({
@@ -101,14 +107,8 @@ resource "databricks_pipeline" "dlt_pipeline" {
 
   depends_on = [ null_resource.run_job_00_setup ]
 
-  provisioner "local-exec" {
-    command = <<-EOT
-    databricks fs cp data/autoloader_1.csv dbfs:/Volumes/_jlieow_dev/etl/landing/files/ --profile ${local.profile}
-    EOT
-  }
-
   name             = "${local.prefix}_pipeline_00_autoloader_sample"
-  edition          = "CORE"
+  edition          = "PRO"
   continuous = false
   run_as_user_name = data.databricks_current_user.me.user_name
 
@@ -135,5 +135,20 @@ resource "databricks_pipeline" "dlt_pipeline" {
 
   configuration = {
     "custom.orderStatus": "O,F"
+  }
+}
+
+resource "null_resource" "populate_volume" {
+
+  depends_on = [ databricks_job.run_00_setup ]
+
+  triggers = {
+    value = timestamp()
+  }
+  
+  provisioner "local-exec" {
+    command = <<-EOT
+    databricks fs cp data/autoloader_1.csv dbfs:/Volumes/_jlieow_dev/etl/landing/files/ --profile ${local.profile}
+    EOT
   }
 }

@@ -101,12 +101,6 @@ resource "databricks_pipeline" "dlt_pipeline" {
 
   depends_on = [ null_resource.run_job_00_setup ]
 
-  provisioner "local-exec" {
-    command = <<-EOT
-    databricks fs cp data/autoloader_1.csv dbfs:/Volumes/_jlieow_dev/etl/landing/files/ --profile ${local.profile}
-    EOT
-  }
-
   name             = "${local.prefix}_pipeline_00_autoloader_sample"
   edition          = "CORE"
   continuous = false
@@ -135,5 +129,20 @@ resource "databricks_pipeline" "dlt_pipeline" {
 
   configuration = {
     "custom.orderStatus": "O,F"
+  }
+}
+
+resource "null_resource" "populate_volume" {
+
+  depends_on = [ databricks_job.run_00_setup ]
+
+  triggers = {
+    value = timestamp()
+  }
+  
+  provisioner "local-exec" {
+    command = <<-EOT
+    databricks fs cp data/autoloader_1.csv dbfs:/Volumes/_jlieow_dev/etl/landing/files/ --profile ${local.profile}
+    EOT
   }
 }
