@@ -2,6 +2,8 @@
 
 Use `az login`.
 
+To select subscription and tenant use `az login --output table` and choose from the menu.
+
 # Configure Remote State Storage Account
 
 Create a Azure storage account and container:

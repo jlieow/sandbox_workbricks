@@ -7,6 +7,7 @@ terraform {
 
 provider "azurerm" {
   features {}
+  subscription_id = "edd4cc45-85c7-4aec-8bf5-648062d519bf"
 }
 
 variable "region" {
@@ -39,7 +40,7 @@ data "external" "me" {
 }
 
 locals {
-  prefix = "databricksdemo${random_string.naming.result}"
+  prefix = "jlieow-databricksdemo${random_string.naming.result}"
   tags = {
     Environment = "Demo"
     Owner       = lookup(data.external.me.result, "name")

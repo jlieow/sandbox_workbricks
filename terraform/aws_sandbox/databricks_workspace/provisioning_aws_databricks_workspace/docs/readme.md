@@ -34,7 +34,7 @@ Terraform AWS provider version = "~> 4.15.0" likely uses the old version of AWS 
 
 ### Unable to view page
 
-Only the service principal has access to the workspace. 
+Only the entity used to create the workspace has access to the workspace. 
 
 In order to grant yourself access, first add a Unity Catalog by navigating to `Workspaces > [Workspace] > Configuration > Update Workspace`. Ensure you select a metastore that is in the same region.
 
