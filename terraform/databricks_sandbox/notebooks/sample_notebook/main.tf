@@ -9,12 +9,12 @@ terraform {
 		resource_group_name  = "fe-shared-emea-001"
 		storage_account_name = "jlieowtfstate54321abcde"
 		container_name       = "tfstate"
-		key                  = "databricks_sandbox/notebooks/sample_notebook/terraform.tfstate"
+		key                  = "databricks_workspaces/logfood-master/sample_notebook/terraform.tfstate"
   }
 }
 
 locals {
-  profile = "jeromelieowdatabricks_free_edition"
+  profile = "jeromelieowdatabricks_logfood-master"
 }
 
 provider "databricks" {
