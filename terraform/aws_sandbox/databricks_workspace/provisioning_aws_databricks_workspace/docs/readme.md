@@ -6,7 +6,7 @@ Deploy a Databricks AWS Workspace using the Terraform [guide](https://registry.t
 
 This guide uses a [Databricks admin console](https://accounts.cloud.databricks.com/) Service Principal.
 
-Unfortunately, the Databricks admin console does not support creating Service Principals via the Databricks CLI.
+The service prinicpal can be created via Terraform. However the guide uses the console.
 
 Create a Service Principal in databricks and provide it the `Account admin` role.
 

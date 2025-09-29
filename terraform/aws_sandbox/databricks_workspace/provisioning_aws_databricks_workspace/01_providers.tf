@@ -23,7 +23,7 @@ provider "aws" {
   region  = var.region
 }
 
-// initialize provider in "MWS" mode to provision new workspace
+// initialize provider in "MWS" (Multiworkspace Services) mode to provision new workspace
 provider "databricks" {
   alias         = "mws"
   host          = "https://accounts.cloud.databricks.com"
