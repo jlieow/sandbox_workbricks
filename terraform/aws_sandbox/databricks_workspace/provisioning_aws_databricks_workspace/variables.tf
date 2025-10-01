@@ -14,12 +14,12 @@ variable "region" {
   default = "eu-west-2"
 }
 
-resource "random_string" "naming" {
+resource "random_string" "random" {
   special = false
   upper   = false
   length  = 6
 }
 
 locals {
-  prefix = "jlieow-demo${random_string.naming.result}"
+  prefix = "jlieow-demo${random_string.random.result}"
 }

@@ -26,7 +26,7 @@ variable "no_public_ip" {
   description = "Defines whether Secure Cluster Connectivity (No Public IP) should be enabled."
 }
 
-resource "random_string" "naming" {
+resource "random_string" "random" {
   special = false
   upper   = false
   length  = 6
@@ -40,7 +40,7 @@ data "external" "me" {
 }
 
 locals {
-  prefix = "jlieow-databricksdemo${random_string.naming.result}"
+  prefix = "jlieow-databricksdemo${random_string.random.result}"
   tags = {
     Environment = "Demo"
     Owner       = lookup(data.external.me.result, "name")
